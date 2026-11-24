@@ -29,8 +29,10 @@
   .band::before,.band::after{content:"";position:absolute;top:0;bottom:0;width:120px;z-index:2}
   .band::before{left:0;background:linear-gradient(90deg,#0b0f1e,transparent)}
   .band::after{right:0;background:linear-gradient(-90deg,#0b0f1e,transparent)}
-  .track{display:flex;width:max-content;animation:defile 110s linear infinite}
-  .track img{height:64px;margin:0 70px;opacity:.9}
+  .track{display:flex;width:max-content;will-change:transform}
+  .band{cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+  .band.drag{cursor:grabbing}
+  .track img{height:64px;margin:0 70px;opacity:.9;-webkit-user-drag:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;pointer-events:none}
   @keyframes defile{from{transform:translateX(0)}to{transform:translateX(-50%)}}
   footer{font-size:14px;color:rgba(255,255,255,.75);padding:24px 20px 28px}
   @media (max-width:640px){.bg{background-image:url(/chauffeur.jpg)}.logo{height:64px}.track img{height:44px;margin:0 38px}.band{padding:28px 0}.cta{padding:17px 26px}}
@@ -79,8 +81,6 @@
   .cta:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(200,16,46,.6)}
   .cta:hover::after{left:130%}
   .track img{transition:opacity .3s,transform .3s}
-  .band:hover .track{animation-play-state:paused}
-  .track img:hover{opacity:1;transform:scale(1.08)}
   @media (max-width:640px){.hword .big{font-size:46px}.hword .sm{font-size:35px}.bang{height:48px;width:20px}.bang::before{height:31px;width:14px;left:6px}.bang::after{width:13px;height:13px}.cdf{font-size:11px}}
   @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-delay:0s!important}}
 </style>
@@ -100,7 +100,7 @@
     <a class="cta" href="https://vtc.houraformation.fr/">Découvrir la formation VTC →</a>
     <a class="tel" href="tel:+33956991776">Une question ? Appelez-nous : <b>09 56 99 17 76</b></a>
   </div>
-  <div class="band"><div class="track"><img src="/w-qualiopi.png" alt="Qualiopi"><img src="/w-mcf.png" alt="Mon Compte Formation"><img src="/w-francetravail.png" alt="France Travail"><img src="/w-opco.png" alt="OPCO"><img src="/w-alma.png" alt="Alma"><img src="/w-qualiopi.png" alt="Qualiopi"><img src="/w-mcf.png" alt="Mon Compte Formation"><img src="/w-francetravail.png" alt="France Travail"><img src="/w-opco.png" alt="OPCO"><img src="/w-alma.png" alt="Alma"><img src="/w-qualiopi.png" alt="Qualiopi"><img src="/w-mcf.png" alt="Mon Compte Formation"><img src="/w-francetravail.png" alt="France Travail"><img src="/w-opco.png" alt="OPCO"><img src="/w-alma.png" alt="Alma"><img src="/w-qualiopi.png" alt="Qualiopi"><img src="/w-mcf.png" alt="Mon Compte Formation"><img src="/w-francetravail.png" alt="France Travail"><img src="/w-opco.png" alt="OPCO"><img src="/w-alma.png" alt="Alma"></div></div>
+  <div class="band"><div class="track"><img draggable="false" src="/w-qualiopi.png" alt="Qualiopi"><img draggable="false" src="/w-mcf.png" alt="Mon Compte Formation"><img draggable="false" src="/w-francetravail.png" alt="France Travail"><img draggable="false" src="/w-opco.png" alt="OPCO"><img draggable="false" src="/w-alma.png" alt="Alma"><img draggable="false" src="/w-qualiopi.png" alt="Qualiopi"><img draggable="false" src="/w-mcf.png" alt="Mon Compte Formation"><img draggable="false" src="/w-francetravail.png" alt="France Travail"><img draggable="false" src="/w-opco.png" alt="OPCO"><img draggable="false" src="/w-alma.png" alt="Alma"><img draggable="false" src="/w-qualiopi.png" alt="Qualiopi"><img draggable="false" src="/w-mcf.png" alt="Mon Compte Formation"><img draggable="false" src="/w-francetravail.png" alt="France Travail"><img draggable="false" src="/w-opco.png" alt="OPCO"><img draggable="false" src="/w-alma.png" alt="Alma"><img draggable="false" src="/w-qualiopi.png" alt="Qualiopi"><img draggable="false" src="/w-mcf.png" alt="Mon Compte Formation"><img draggable="false" src="/w-francetravail.png" alt="France Travail"><img draggable="false" src="/w-opco.png" alt="OPCO"><img draggable="false" src="/w-alma.png" alt="Alma"></div></div>
   <footer>Houra Formation · 2 impasse des Artisans, 77100 Meaux</footer>
 </div>
 <script>
@@ -111,6 +111,20 @@
     document.addEventListener('mouseleave',function(){b.classList.remove('mouse')});
     document.querySelectorAll('a').forEach(function(a){a.addEventListener('mouseenter',function(){b.classList.add('on-link')});a.addEventListener('mouseleave',function(){b.classList.remove('on-link')})});
     (function loop(){x+=(mx-x)*.15;y+=(my-y)*.15;c.style.transform='translate('+x+'px,'+y+'px)';requestAnimationFrame(loop)})();
+  })();
+
+  (function(){
+    var band=document.querySelector('.band'),tr=document.querySelector('.track');if(!band)return;
+    var x=0,half=0,down=false,sx=0,ox=0,last=performance.now(),hover=false;
+    function measure(){half=tr.scrollWidth/2}measure();addEventListener('resize',measure);addEventListener('load',measure);
+    function wrap(){if(half){while(x<=-half)x+=half;while(x>0)x-=half}}
+    (function tick(t){var dt=(t-last)/1000;last=t;if(!down&&!hover&&half){x-=half/110*dt}wrap();tr.style.transform='translateX('+x+'px)';requestAnimationFrame(tick)})(last);
+    band.addEventListener('pointerdown',function(e){down=true;sx=e.clientX;ox=x;band.classList.add('drag');band.setPointerCapture(e.pointerId)});
+    band.addEventListener('pointermove',function(e){if(down){x=ox+(e.clientX-sx);wrap()}});
+    function up(){down=false;band.classList.remove('drag')}
+    band.addEventListener('pointerup',up);band.addEventListener('pointercancel',up);
+    band.addEventListener('mouseenter',function(){hover=true});band.addEventListener('mouseleave',function(){hover=false});
+    band.addEventListener('contextmenu',function(e){e.preventDefault()});band.addEventListener('dragstart',function(e){e.preventDefault()});
   })();
 </script>
 </body>
