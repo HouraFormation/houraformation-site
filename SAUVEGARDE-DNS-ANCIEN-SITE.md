@@ -48,9 +48,23 @@ Pour afficher l'ancien site sur un autre nom de domaine : faire pointer ce domai
 | TXT | _dmarc | v=DMARC1; p=quarantine; |
 | TXT | _dmarc.mails | v=DMARC1;p=none; |
 
-## Changements faits le 24/11/2026 (bascule vers la page de maintenance)
-- `A @ 193.37.145.80` → remplacé par 4 × `A @` : 185.199.108.153, 185.199.109.153, 185.199.110.153, 185.199.111.153 (GitHub Pages)
-- `CNAME www @` → `CNAME www houraformation.github.io.`
-- `CNAME ftp @` → `A ftp 193.37.145.80` (pour garder l'accès FTP à l'hébergement LWS)
-- `CNAME cfa houraformation.fr` → `A cfa 193.37.145.80` (cfa.houraformation.fr continue d'afficher l'hébergement LWS)
-- Tout le reste (emails, mailgun/GHL, lms, vtc, SPF, DKIM, DMARC, NS) : **inchangé**
+## Journal des modifications DNS réellement faites le 24/11/2026
+
+| Heure | Action | Avant | Après |
+|---|---|---|---|
+| ~11 h 55 | Modifié | A @ 193.37.145.80 (TTL 6 h) | A @ 185.199.108.153 |
+| ~11 h 55 | Supprimé automatiquement par LWS (conséquence du changement ci-dessus) | AAAA @ 2a00:7ee0:1:0:3:2204:0:35f (IPv6 web LWS par défaut) | — |
+| ~11 h 56 | Ajouté | — | A @ 185.199.109.153 |
+| ~11 h 57 | Ajouté | — | A @ 185.199.110.153 |
+| ~11 h 58 | Ajouté | — | A @ 185.199.111.153 |
+| ~11 h 59 | Supprimé (erreur, non demandé) | CNAME ftp @ (TTL 24 h) | — |
+| ~12 h 05 | Remis comme avant | — | CNAME ftp @ (TTL 6 h au lieu de 24 h) |
+| ~12 h 06 | Modifié | CNAME www @ (TTL 24 h) | CNAME www houraformation.github.io. |
+
+Aucun autre enregistrement n'a été touché (emails, mailgun/GHL, lms, vtc, cfa, houra.fr, SPF, DKIM, DMARC, NS).
+
+### Pour tout annuler (revenir à l'ancien site)
+1. Supprimer les 4 lignes `A @ 185.199.10x.153`
+2. Ajouter `A @ 193.37.145.80`
+3. (optionnel) Ajouter `AAAA @ 2a00:7ee0:1:0:3:2204:0:35f`
+4. Modifier `CNAME www` → `@`
